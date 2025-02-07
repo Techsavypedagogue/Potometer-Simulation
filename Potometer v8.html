@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Potometer Simulation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background: #f5f5f5;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+    .input-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 1rem;
+      background: #fafafa;
+      width: 180px;
+    }
+    .input-box label {
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    .input-box input[type="range"] {
+      width: 160px;
+      margin-bottom: 0.5rem;
+    }
+    .input-box span {
+      margin-bottom: 0.5rem;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    button {
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    thead tr:first-child th {
+      background: #e0e0e0;
+    }
+
+    /* Minimal visuals for the sliders and leaves */
+
+    /* Thermometer (Temperature) */
+    .thermometer {
+      width: 50px;
+      height: 150px;
+      border: 2px solid #999;
+      border-radius: 10px;
+      position: relative;
+      background: linear-gradient(to bottom, #ccc 0%, #fff 100%);
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    .mercury {
+      width: 100%;
+      background: red;
+      position: absolute;
+      bottom: 0;
+      transition: height 0.3s;
+    }
+
+    /* Fan (Wind) */
+    .fan-container {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      border: 2px solid #666;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.5rem 0;
+      background: #ddd;
+    }
+    .fan-icon {
+      font-size: 32px; 
+      line-height: 1;
+    }
+    .fan-arrows {
+      position: absolute;
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0;
+      pointer-events: none; 
+    }
+    .arrow {
+      position: absolute;
+      font-size: 20px;
+      color: #666;
+      transform-origin: center center;
+    }
+
+    /* Lamp (Light) */
+    .lamp {
+      width: 50px;
+      height: 60px;
+      background: #000; 
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    .lamp-light {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,1) 30%, rgba(255,255,255,0) 80%);
+      opacity: 0; 
+      transition: opacity 0.3s;
+    }
+
+    /* Cloud (Humidity) */
+    .cloud {
+      width: 80px;
+      height: 50px;
+      background: #ccc;
+      border-radius: 40px;
+      position: relative;
+      margin: 0.5rem 0;
+    }
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: #ccc;
+      border-radius: 50%;
+    }
+    .cloud::before {
+      width: 35px;
+      height: 35px;
+      top: -15px;
+      left: 2px;
+    }
+    .cloud::after {
+      width: 40px;
+      height: 40px;
+      top: -20px;
+      right: -5px;
+    }
+    .droplets {
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding-bottom: 10px;
+    }
+    .droplet {
+      width: 8px;
+      height: 8px;
+      background: #00f;
+      border-radius: 50%;
+      margin: 2px;
+    }
+
+    /* Branch + Leaves (Leaves) */
+    .branch-container {
+      width: 60px;
+      height: 80px;
+      position: relative;
+      margin: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .branch {
+      width: 10px;
+      height: 60px;
+      background: #8B4513; 
+      border-radius: 3px;
+      position: absolute;
+      bottom: 10px; 
+      left: 25px;  /* center it in a 60px container (left=25..35) */
+    }
+    .leaves {
+      position: absolute;
+      top: 0; 
+      left: 0; 
+      right: 0; 
+      bottom: 0;
+    }
+    .leaf {
+      width: 12px;
+      height: 12px;
+      background: green;
+      border-radius: 50%;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <h1>Potometer Simulation</h1>
+  
+  <!-- Potometer image under the main heading -->
+  <div style="text-align: center; margin-bottom: 1rem;">
+    <img 
+      src="https://i.postimg.cc/T2sv8rNF/Screenshot-2025-02-07-at-9-45-53-PM.jpg" 
+      alt="A simple potometer"
+      style="max-width: 1800px; height: auto; border: 1px solid #ccc;"
+    />
+  </div>
+
+  <div class="container">
+    <h2>1. Choose Your Independent Variable</h2>
+    <div class="radio-group" id="radioGroup">
+      <label><input type="radio" name="iv" value="wind"> Wind Velocity (m/s)</label>
+      <label><input type="radio" name="iv" value="light"> Light Intensity (lux)</label>
+      <label><input type="radio" name="iv" value="temp"> Temperature (°C)</label>
+      <label><input type="radio" name="iv" value="humidity"> Humidity (%)</label>
+      <label><input type="radio" name="iv" value="leaves"> Number of Leaves</label>
+    </div>
+
+    <h2>2. Set Values</h2>
+    <p style="text-align:center; margin:0;">
+      <em>Select your IV above. That slider is disabled so you can adjust the other four as controls. 
+      Then click "Lock Controls" to freeze them and unlock the IV.</em>
+    </p>
+
+    <!-- Sliders & visuals -->
+    <div class="flex-row">
+      <!-- Wind -->
+      <div class="input-box">
+        <label for="windInput">Wind Velocity (m/s)</label>
+        <input
+          id="windInput"
+          type="range"
+          min="0"
+          max="20"
+          step="1"
+          value="5"
+          oninput="updateLabel('windVal', this.value); updateVisuals();"
+          disabled
+        />
+        <span id="windVal">5</span>
+        <div class="fan-container">
+          <div class="fan-icon">🌀</div>
+          <div class="fan-arrows" id="fanArrows"></div>
+        </div>
+      </div>
+
+      <!-- Light -->
+      <div class="input-box">
+        <label for="lightInput">Light Intensity (lux)</label>
+        <input
+          id="lightInput"
+          type="range"
+          min="0"
+          max="2000"
+          step="10"
+          value="300"
+          oninput="updateLabel('lightVal', this.value); updateVisuals();"
+          disabled
+        />
+        <span id="lightVal">300</span>
+        <div class="lamp">
+          <div class="lamp-light" id="lampLight"></div>
+        </div>
+      </div>
+
+      <!-- Temperature -->
+      <div class="input-box">
+        <label for="tempInput">Temperature (°C)</label>
+        <input
+          id="tempInput"
+          type="range"
+          min="0"
+          max="50"
+          step="1"
+          value="20"
+          oninput="updateLabel('tempVal', this.value); updateVisuals();"
+          disabled
+        />
+        <span id="tempVal">20</span>
+        <div class="thermometer">
+          <div class="mercury" id="mercuryFill"></div>
+        </div>
+      </div>
+
+      <!-- Humidity -->
+      <div class="input-box">
+        <label for="humidityInput">Humidity (%)</label>
+        <input
+          id="humidityInput"
+          type="range"
+          min="0"
+          max="100"
+          step="5"
+          value="50"
+          oninput="updateLabel('humidityVal', this.value); updateVisuals();"
+          disabled
+        />
+        <span id="humidityVal">50</span>
+        <div class="cloud">
+          <div class="droplets" id="dropletsContainer"></div>
+        </div>
+      </div>
+
+      <!-- Leaves -->
+      <div class="input-box">
+        <label for="leavesInput">Number of Leaves</label>
+        <input
+          id="leavesInput"
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value="5"
+          oninput="updateLabel('leavesVal', this.value); updateVisuals();"
+          disabled
+        />
+        <span id="leavesVal">5</span>
+        <div class="branch-container">
+          <div class="branch"></div>
+          <div class="leaves" id="leavesContainer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button onclick="lockControls()">Lock Controls</button>
+      <button onclick="generateResults()">Generate Results</button>
+      <button onclick="resetExperiment()">Restart Experiment</button>
+      <button onclick="exportToCSV()">Export CSV</button>
+    </div>
+
+    <!-- Results Table: updated column label with +/- 0.5 ml mention -->
+    <table>
+      <thead>
+        <tr>
+          <th id="ivHeader">Independent Variable</th>
+          <th colspan="5">Transpiration Rate (mm/hr) (+/- 0.5 ml)</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th>Trial 1</th>
+          <th>Trial 2</th>
+          <th>Trial 3</th>
+          <th>Trial 4</th>
+          <th>Trial 5</th>
+        </tr>
+      </thead>
+      <tbody id="resultsTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Second image + copyright at bottom -->
+  <div style="text-align: center; margin-top: 2rem;">
+    <img 
+      src="https://i.postimg.cc/dtTPJLz1/Start-and-end-screen-Tw-T-Banner.png"
+      alt="TwT banner image"
+      style="max-width: 500px; height: auto; border: 1px solid #ccc;"
+    />
+    <div style="font-size: 0.9em; color: #666; margin-top: 1rem;">
+      &copy; B. Moran 2025
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+       Global State
+       ========================= */
+    let chosenIV = null;
+    let controlsLocked = false;
+
+    let controlVals = {
+      wind: 5,
+      light: 300,
+      temp: 20,
+      humidity: 50,
+      leaves: 5
+    };
+
+    // Data: each row => { ivValue, trials: [5 numbers] }
+    const resultsData = [];
+
+    // 1) Choose IV
+    document.getElementById('radioGroup').addEventListener('change', (e) => {
+      chosenIV = e.target.value;
+      enableAllSliders();
+      // Temporarily disable the chosen IV
+      document.getElementById(chosenIV + 'Input').disabled = true;
+      controlsLocked = false;
+    });
+
+    function enableAllSliders() {
+      document.getElementById('windInput').disabled     = false;
+      document.getElementById('lightInput').disabled    = false;
+      document.getElementById('tempInput').disabled     = false;
+      document.getElementById('humidityInput').disabled = false;
+      document.getElementById('leavesInput').disabled   = false;
+    }
+
+    function lockControls() {
+      if (!chosenIV) {
+        alert("Please choose an Independent Variable first.");
+        return;
+      }
+      if (controlsLocked) {
+        alert("Controls are already locked.");
+        return;
+      }
+
+      // Save slider states
+      controlVals.wind     = parseFloat(document.getElementById('windInput').value);
+      controlVals.light    = parseFloat(document.getElementById('lightInput').value);
+      controlVals.temp     = parseFloat(document.getElementById('tempInput').value);
+      controlVals.humidity = parseFloat(document.getElementById('humidityInput').value);
+      controlVals.leaves   = parseFloat(document.getElementById('leavesInput').value);
+
+      // Lock all
+      enableAllSliders();
+      document.getElementById('windInput').disabled     = true;
+      document.getElementById('lightInput').disabled    = true;
+      document.getElementById('tempInput').disabled     = true;
+      document.getElementById('humidityInput').disabled = true;
+      document.getElementById('leavesInput').disabled   = true;
+
+      // Unlock chosen IV
+      document.getElementById(chosenIV + 'Input').disabled = false;
+
+      const nameMap = {
+        wind:     "Wind Velocity (m/s)",
+        light:    "Light Intensity (lux)",
+        temp:     "Temperature (°C)",
+        humidity: "Humidity (%)",
+        leaves:   "Number of Leaves"
+      };
+      document.getElementById('ivHeader').textContent = nameMap[chosenIV] || "Independent Variable";
+
+      controlsLocked = true;
+    }
+
+    function generateResults() {
+      if (!chosenIV) {
+        alert("No IV selected.");
+        return;
+      }
+      if (!controlsLocked) {
+        alert("Controls not locked. Click 'Lock Controls' first.");
+        return;
+      }
+
+      const ivVal = parseFloat(document.getElementById(chosenIV + 'Input').value);
+
+      let windVal   = controlVals.wind;
+      let lightVal  = controlVals.light;
+      let tempVal   = controlVals.temp;
+      let humidVal  = controlVals.humidity;
+      let leavesVal = controlVals.leaves;
+
+      if (chosenIV === 'wind')      windVal   = ivVal;
+      if (chosenIV === 'light')     lightVal  = ivVal;
+      if (chosenIV === 'temp')      tempVal   = ivVal;
+      if (chosenIV === 'humidity')  humidVal  = ivVal;
+      if (chosenIV === 'leaves')    leavesVal = ivVal;
+
+      // If leaves=0 => always 0
+      if (leavesVal === 0) {
+        resultsData.push({ ivValue: ivVal, trials: [0,0,0,0,0] });
+        updateResultsTable();
+        return;
+      }
+
+      /***********************************************
+       * Example linear formula:
+       * Tbase = A*wind + B*light + C*temp + D*leaves - E*humidity
+       * clamp(0), then ±0.3 noise
+       ***********************************************/
+      const A = 0.02;  
+      const B = 0.002;
+      const C = 0.03;  
+      const D = 0.1;   
+      const E = 0.02;  
+
+      let Tbase = A*windVal + B*lightVal + C*tempVal + D*leavesVal - E*humidVal;
+      if (Tbase < 0) Tbase = 0;
+
+      const trialsArr = [];
+      for (let i=0; i<5; i++){
+        let noise = (Math.random()-0.5)*2*0.3;
+        let reading = Tbase + noise;
+        if (reading<0) reading=0;
+        trialsArr.push(reading);
+      }
+
+      resultsData.push({ ivValue: ivVal, trials: trialsArr });
+      updateResultsTable();
+    }
+
+    function updateResultsTable() {
+      const tbody = document.getElementById('resultsTable');
+      tbody.innerHTML = '';
+      resultsData.forEach(row => {
+        const tr = document.createElement('tr');
+
+        const ivTd = document.createElement('td');
+        ivTd.textContent = row.ivValue.toFixed(1);
+        tr.appendChild(ivTd);
+
+        row.trials.forEach(val => {
+          const td = document.createElement('td');
+          td.textContent = val.toFixed(3);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function resetExperiment() {
+      chosenIV = null;
+      controlsLocked = false;
+      resultsData.length=0;
+
+      const radios = document.querySelectorAll('#radioGroup input[type=radio]');
+      radios.forEach(r => r.checked=false);
+
+      document.getElementById('windInput').value=5;     
+      document.getElementById('windVal').textContent=5;     
+      document.getElementById('windInput').disabled=true;
+
+      document.getElementById('lightInput').value=300;  
+      document.getElementById('lightVal').textContent=300;  
+      document.getElementById('lightInput').disabled=true;
+
+      document.getElementById('tempInput').value=20;    
+      document.getElementById('tempVal').textContent=20;    
+      document.getElementById('tempInput').disabled=true;
+
+      document.getElementById('humidityInput').value=50; 
+      document.getElementById('humidityVal').textContent=50; 
+      document.getElementById('humidityInput').disabled=true;
+
+      document.getElementById('leavesInput').value=5;
+      document.getElementById('leavesVal').textContent=5;    
+      document.getElementById('leavesInput').disabled=true;
+
+      document.getElementById('resultsTable').innerHTML="";
+      document.getElementById('ivHeader').textContent="Independent Variable";
+
+      controlVals = {
+        wind: 5,
+        light: 300,
+        temp: 20,
+        humidity: 50,
+        leaves: 5
+      };
+
+      updateVisuals();
+    }
+
+    function exportToCSV() {
+      if (resultsData.length===0){
+        alert("No data to export.");
+        return;
+      }
+      const ivHdr = document.getElementById('ivHeader').textContent;
+      // Updated heading includes your new text
+      const row1 = `${ivHdr},Transpiration Rate (mm/hr) (+/- 0.5 ml),,,,\n`;
+      const row2 = `,Trial 1,Trial 2,Trial 3,Trial 4,Trial 5\n`;
+      let csv = row1 + row2;
+
+      resultsData.forEach(row => {
+        const arr = [ row.ivValue.toFixed(1) ];
+        row.trials.forEach(t => arr.push(t.toFixed(3)));
+        csv += arr.join(",") + "\n";
+      });
+
+      const blob = new Blob([csv], { type:'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download="potometer_data.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function updateLabel(labelId, val) {
+      document.getElementById(labelId).textContent = val;
+    }
+
+    function updateVisuals() {
+      const windVal   = parseFloat(document.getElementById('windInput').value);
+      const lightVal  = parseFloat(document.getElementById('lightInput').value);
+      const tempVal   = parseFloat(document.getElementById('tempInput').value);
+      const humidVal  = parseFloat(document.getElementById('humidityInput').value);
+      const leavesVal = parseFloat(document.getElementById('leavesInput').value);
+
+      // Thermometer fill
+      const thermoPercent = (tempVal / 50) * 100;
+      document.getElementById('mercuryFill').style.height = thermoPercent + "%";
+
+      // Fan arrows
+      const fanArrows = document.getElementById('fanArrows');
+      fanArrows.innerHTML="";
+      const arrowCount = Math.min(5, Math.floor(windVal / 4));
+      const angles=[0,72,144,216,288];
+      for(let i=0; i<arrowCount; i++){
+        const arrow = document.createElement('div');
+        arrow.className='arrow';
+        arrow.textContent='→';
+        const angle=angles[i];
+        const radius=25;
+        const rad=angle*(Math.PI/180);
+        const x=35 + radius*Math.cos(rad);
+        const y=35 + radius*Math.sin(rad);
+        arrow.style.left = x+"px";
+        arrow.style.top  = y+"px";
+        arrow.style.transform=`translate(-50%,-50%) rotate(${angle}deg)`;
+        fanArrows.appendChild(arrow);
+      }
+
+      // Lamp brightness
+      const lampLight = document.getElementById('lampLight');
+      const lampOpacity = Math.min(1, lightVal / 2000);
+      lampLight.style.opacity = lampOpacity.toFixed(2);
+
+      // Cloud droplets
+      const droplets = document.getElementById('dropletsContainer');
+      droplets.innerHTML="";
+      const dropletCount = Math.round((humidVal/100)*10);
+      for(let i=0; i<dropletCount; i++){
+        const drop = document.createElement('div');
+        drop.className='droplet';
+        droplets.appendChild(drop);
+      }
+
+      // Leaves
+      const leavesC = document.getElementById('leavesContainer');
+      leavesC.innerHTML="";
+      const branchHeight=60;
+      const branchLeft=25;
+      const branchWidth=10;
+      const spacing = branchHeight/(leavesVal+1);
+      for(let i=0; i<leavesVal; i++){
+        const leaf = document.createElement('div');
+        leaf.className='leaf';
+
+        const leafY = branchHeight - spacing*(i+1);
+        leaf.style.bottom = leafY + "px";
+
+        if (i % 2 === 0) {
+          leaf.style.left = (branchLeft - 12) + "px";
+        } else {
+          leaf.style.left = (branchLeft + branchWidth) + "px";
+        }
+        leavesC.appendChild(leaf);
+      }
+    }
+  </script>
+</body>
+</html>
