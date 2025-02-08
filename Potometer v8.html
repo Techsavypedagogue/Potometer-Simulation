@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <title>Potometer Simulation</title>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("Referrer:", document.referrer);
+
+        if (document.referrer.indexOf("https://sites.google.com/view/photometerlandingpage/home") === -1) {
+            alert("Warning: Please access this page through the official landing page.");
+        }
+    });
+</script>
   <style>
     body {
       font-family: Arial, sans-serif;
