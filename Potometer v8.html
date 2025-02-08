@@ -383,7 +383,7 @@
       <thead>
         <tr>
           <th id="ivHeader">Independent Variable</th>
-          <th colspan="5">Transpiration Rate (ml/hr) (+/- 0.5 ml)</th>
+          <th colspan="5">Transpiration Rate (cm/hr) (+/- 0.05 cm)</th>
         </tr>
         <tr>
           <th></th>
@@ -610,7 +610,7 @@
       }
       const ivHdr = document.getElementById('ivHeader').textContent;
       // Updated heading includes your new text
-      const row1 = `${ivHdr},Transpiration Rate (ml/hr) (+/- 0.5 ml),,,,\n`;
+      const row1 = `${ivHdr},Transpiration Rate (cm/hr) (+/- 0.05 cm),,,,\n`;
       const row2 = `,Trial 1,Trial 2,Trial 3,Trial 4,Trial 5\n`;
       let csv = row1 + row2;
 
