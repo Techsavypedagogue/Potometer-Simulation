@@ -5,10 +5,10 @@
   <title>Potometer Simulation</title>
   <script>
     document.addEventListener("DOMContentLoaded", function() {
-        console.log("Referrer:", document.referrer);
-
-        if (document.referrer.indexOf("https://sites.google.com/view/photometerlandingpage/home") === -1) {
-            alert("Warning: Please access this page through the official landing page.");
+        // Check if the user came from the password page
+        if (!sessionStorage.getItem("authenticated")) {
+            alert("Access Denied: Please enter through the official landing page.");
+            window.location.href = "https://sites.google.com/view/photometerlandingpage/home"; // Redirect unauthorized users
         }
     });
 </script>
