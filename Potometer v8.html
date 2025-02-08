@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Potometer Simulation</title>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Check if the user came from the password page
+<script>
+        // Block rendering immediately
         if (!sessionStorage.getItem("authenticated")) {
-            alert("Access Denied: Please enter through the official landing page.");
-            window.location.href = "https://sites.google.com/view/photometerlandingpage/home"; // Redirect unauthorized users
+            window.location.replace("https://sites.google.com/view/photometerlandingpage/home");
         }
-    });
-</script>
+    </script>
   <style>
     body {
       font-family: Arial, sans-serif;
